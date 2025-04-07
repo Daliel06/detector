@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تحليل الروابط وكلمات المرور</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      direction: rtl;
+      text-align: right;
+      padding: 20px;
+    }
+    input, button {
+      padding: 10px;
+      margin: 10px 0;
+      width: 100%;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #f1f1f1;
+    }
+    select {
+      padding: 10px;
+      margin-bottom: 20px;
+    }
+    #togglePassword {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h2 id="title">تحليل الروابط وكلمات المرور</h2>
+
+  <!-- Language selection -->
+  <label for="languageSelect">اختار اللغة / Select Language:</label>
+  <select id="languageSelect" onchange="changeLanguage()">
+    <option value="ar">العربية</option>
+    <option value="en">English</option>
+  </select>
+
+  <label for="urlInput" id="urlLabel">أدخل الرابط:</label>
+  <input type="text" id="urlInput" placeholder="أدخل الرابط هنا">
+  <button onclick="analyzeURL()" id="urlButton">تحليل الرابط</button>
+  <div id="urlResult" class="result"></div>
+
+  <label for="passwordInput" id="passwordLabel">أدخل كلمة المرور:</label>
+  <input type="text" id="passwordInput" placeholder="أدخل كلمة المرور هنا">
+  <button id="togglePassword" onclick="togglePassword()">إخفاء كلمة المرور</button>
+  <button onclick="analyzePassword()" id="passwordButton">اختبار كلمة المرور</button>
+  <div id="passwordResult" class="result"></div>
+
+  <script>
+    // نصوص اللغة العربية والإنجليزية
+    const text = {
+      ar: {
+        title: "تحليل الروابط وكلمات المرور",
+        urlLabel: "أدخل الرابط:",
+        passwordLabel: "أدخل كلمة المرور:",
+        urlButton: "تحليل الرابط",
+        passwordButton: "اختبار كلمة المرور",
+        resultSafeURL: "الرابط موثوق.",
+        resultUnsafeURL: "تحذير: الرابط لا يستخدم HTTPS.",
+        resultSuspiciousURL: "الرابط مشبوه، يرجى التحقق منه.",
+        passwordWeak: "كلمة المرور ضعيفة. تأكد من إضافة حروف كبيرة، أرقام، ورموز.",
+        passwordStrong: "كلمة المرور قوية.",
+        passwordMissing: "كلمة المرور تحتاج إلى تحسين. جرب إضافة حروف كبيرة، أرقام ورموز."
+      },
+      en: {
+        title: "URL and Password Analyzer",
+        urlLabel: "Enter URL:",
+        passwordLabel: "Enter Password:",
+        urlButton: "Analyze URL",
+        passwordButton: "Analyze Password",
+        resultSafeURL: "The URL is trusted.",
+        resultUnsafeURL: "Warning: The URL doesn't use HTTPS.",
+        resultSuspiciousURL: "The URL is suspicious, please verify.",
+        passwordWeak: "Weak password. Make sure to add uppercase letters, numbers, and symbols.",
+        passwordStrong: "Strong password.",
+        passwordMissing: "Password needs improvement. Try adding uppercase letters, numbers, and symbols."
+      }
+    };
+
+    let currentLanguage = "ar";  // Default language
+
+    // تغيير اللغة
+    function changeLanguage() {
+      const lang = document.getElementById("languageSelect").value;
+      currentLanguage = lang;
+      updateText();
+    }
+
+    // تحديث النصوص بناءً على اللغة المختارة
+    function updateText() {
+      document.getElementById("title").innerText = text[currentLanguage].title;
+      document.getElementById("urlLabel").innerText = text[currentLanguage].urlLabel;
+      document.getElementById("passwordLabel").innerText = text[currentLanguage].passwordLabel;
+      document.getElementById("urlButton").innerText = text[currentLanguage].urlButton;
+      document.getElementById("passwordButton").innerText = text[currentLanguage].passwordButton;
+    }
+
+    // تحليل الرابط
+    function analyzeURL() {
+      const url = document.getElementById("urlInput").value;
+      let message = text[currentLanguage].resultSafeURL;
+
+      if (!url.startsWith("https://")) {
+        message = text[currentLanguage].resultUnsafeURL;
+      } else if (url.includes("login") || url.includes("secure") || url.includes("phishing") || url.length > 60) {
+        message = text[currentLanguage].resultSuspiciousURL;
+      }
+
+      document.getElementById("urlResult").innerText = message;
+    }
+
+    // تحليل كلمة المرور
+    function analyzePassword() {
+      const pass = document.getElementById("passwordInput").value;
+      let strength = text[currentLanguage].passwordStrong;
+      let missingCriteria = [];
+
+      if (pass.length < 8) missingCriteria.push("طول كلمة المرور يجب أن يكون 8 أحرف أو أكثر.");
+      if (!/[A-Z]/.test(pass)) missingCriteria.push("يجب أن تحتوي على حروف كبيرة.");
+      if (!/[0-9]/.test(pass)) missingCriteria.push("يجب أن تحتوي على أرقام.");
+      if (!/[!@#\$%\^&\*]/.test(pass)) missingCriteria.push("يجب أن تحتوي على رموز خاصة.");
+
+      if (missingCriteria.length > 0) {
+        strength = text[currentLanguage].passwordMissing + " " + missingCriteria.join(" ");
+      }
+
+      document.getElementById("passwordResult").innerText = strength;
+    }
+
+    // وظيفة إظهار/إخفاء كلمة المرور
+    function togglePassword() {
+      const passwordInput = document.getElementById("passwordInput");
+      const toggleButton = document.getElementById("togglePassword");
+
+      if (passwordInput.type === "text") {
+        passwordInput.type = "password";
+        toggleButton.innerText = currentLanguage === "ar" ? "إظهار كلمة المرور" : "Show Password";
+      } else {
+        passwordInput.type = "text";
+        toggleButton.innerText = currentLanguage === "ar" ? "إخفاء كلمة المرور" : "Hide Password";
+      }
+    }
+
+    // عند تحميل الصفحة، نقوم بتحديث النصوص حسب اللغة الافتراضية
+    updateText();
+  </script>
+
+</body>
+</html>
